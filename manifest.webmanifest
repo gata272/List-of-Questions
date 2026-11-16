@@ -1,1 +1,29 @@
-{"background_color":"#f2f2f7","description":"CSVの問題集で学ぶ、正誤トレーナーのWeb版","display":"standalone","icons":[{"sizes":"192x192","src":"icons/icon-192.png","type":"image/png"},{"sizes":"512x512","src":"icons/icon-512.png","type":"image/png"},{"purpose":"maskable","sizes":"512x512","src":"icons/icon-maskable-512.png","type":"image/png"}],"name":"正誤トレーナー","orientation":"portrait","scope":".","short_name":"正誤トレーナー","start_url":".","theme_color":"#4f46e5"}
+{
+  "background_color": "#000000",
+  "description": "CSVの問題集で学ぶ、正誤トレーナーのWeb版",
+  "display": "standalone",
+  "icons": [
+    {
+      "sizes": "192x192",
+      "src": "icons/icon-192.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "icons/icon-512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "正誤トレーナー",
+  "orientation": "portrait",
+  "scope": ".",
+  "short_name": "正誤トレーナー",
+  "start_url": ".",
+  "theme_color": "#000000"
+}
