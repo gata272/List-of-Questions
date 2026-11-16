@@ -1314,6 +1314,10 @@ $("#jsonInput").addEventListener("change", e => {
 if ("serviceWorker" in navigator){
   try { navigator.serviceWorker.register("sw.js").catch(()=>{}); } catch(e) { /* 未対応環境では何もしない */ }
 }
+// ブラウザに「このサイトのデータは消さないで」という永続化を要求する（容量逼迫時の自動削除から守る）
+if (navigator.storage && navigator.storage.persist){
+  try { navigator.storage.persist().catch(()=>{}); } catch(e) { /* 未対応環境では何もしない */ }
+}
 loadDB().then(()=> render());
 </script>
 </body>

@@ -1,6 +1,6 @@
 // 正誤トレーナー Web版 Service Worker
 // アプリ本体をキャッシュして、オフラインでも起動できるようにする
-const CACHE_NAME = "seigo-web-v2";
+const CACHE_NAME = "seigo-web-v3";
 const ASSETS = [
   "./",
   "./index.html",
