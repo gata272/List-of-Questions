@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>正誤トレーナー</title>
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="正誤トレーナー">
+<style>
+:root{
+  --accent:#4f46e5; --accent-d:#4338ca; --green:#16a34a; --red:#dc2626;
+  --bg:#f2f2f7; --card:#fff; --sep:#e5e5ea; --sub:#6b7280; --text:#111827;
+  --radius:14px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background:var(--bg); color:var(--text); font-size:16px; line-height:1.5;
+}
+#app{max-width:680px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;}
+main{flex:1;padding:12px 12px 24px;}
+main.with-tab{padding-bottom:96px;}
+h1.screen-title{font-size:20px;margin:6px 2px 12px;}
+.topbar{display:flex;align-items:center;gap:8px;padding:2px 0 10px;min-height:36px;}
+.topbar .spacer{flex:1;}
+.topbar .set-name{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+button{font:inherit;cursor:pointer;}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid var(--sep);background:var(--card);color:var(--text);
+  border-radius:10px;padding:8px 14px;font-size:15px;min-height:40px;
+}
+.btn:active{background:#ececf1;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.btn.primary:active{background:var(--accent-d);}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff;font-weight:600;}
+.btn.red-outline{color:var(--red);}
+.btn.danger{color:var(--red);}
+.btn.block{width:100%;}
+.btn.big{width:100%;padding:13px;font-size:16px;border-radius:12px;}
+.btn:disabled{opacity:.45;cursor:default;}
+.btn.small{min-height:32px;padding:4px 10px;font-size:14px;border-radius:8px;}
+.icon-btn{
+  border:none;background:transparent;font-size:20px;line-height:1;padding:6px 8px;color:var(--sub);
+}
+.card{background:var(--card);border-radius:var(--radius);padding:6px 14px;margin-bottom:14px;}
+.card.flush{padding:0;overflow:hidden;}
+.section-label{font-size:13px;color:var(--sub);margin:14px 4px 6px;}
+.row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--sep);}
+.row:last-child{border-bottom:none;}
+.row .grow{flex:1;min-width:0;}
+.sub{color:var(--sub);font-size:13px;}
+.small{font-size:13px;}
+.caption{font-size:12px;color:var(--sub);}
+.set-row{cursor:pointer;}
+.set-name{font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.badge-score{font-weight:700;font-size:14px;}
+.score-pos{color:var(--green);} .score-neg{color:var(--red);} .score-zero{color:var(--sub);}
+.star-on{color:#eab308;} .star-off{color:#c7c7cc;}
+.progress{height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:4px 0 2px;}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .25s;}
+.qfront{white-space:pre-wrap;word-break:break-word;font-size:16.5px;}
+.answer-box{border-top:1px solid var(--sep);margin-top:14px;padding-top:12px;}
+.answer-box .ans{font-weight:700;font-size:16.5px;}
+.result-ok{color:var(--green);font-weight:700;font-size:17px;}
+.result-ng{color:var(--red);font-weight:700;font-size:17px;}
+.expl{white-space:pre-wrap;word-break:break-word;font-size:14.5px;margin-top:8px;}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:10px;}
+.opt-btn{
+  border:none;border-radius:12px;background:#e9e9ef;color:var(--text);
+  font-size:24px;font-weight:700;padding:14px 0;
+}
+.opt-btn.correct{background:var(--green);color:#fff;}
+.opt-btn.wrongpick{background:var(--red);color:#fff;}
+.opt-btn:disabled{cursor:default;}
+.quiz-bottom{
+  position:sticky;bottom:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border-top:1px solid var(--sep);padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  margin:12px -12px -24px;
+}
+.quiz-bottom .util-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.star-btn{font-size:27px;background:none;border:none;padding:2px 8px;line-height:1;}
+.btn-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.switch{position:relative;width:50px;height:30px;flex:none;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .track{position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:.2s;}
+.switch .track:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.switch input:checked + .track{background:var(--green);}
+.switch input:checked + .track:before{transform:translateX(20px);}
+.disc{border-bottom:1px solid var(--sep);}
+.disc:last-child{border-bottom:none;}
+.disc-head{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:12px 0;font-size:16px;text-align:left;color:var(--text);}
+.disc-head .val{margin-left:auto;color:var(--sub);font-size:15px;}
+.disc-head .chev{color:#c7c7cc;font-size:13px;}
+.disc-body{padding:0 0 12px;}
+input[type="text"],input[type="number"],textarea,select{
+  font:inherit;color:var(--text);background:#fff;border:1px solid var(--sep);border-radius:9px;
+  padding:8px 10px;min-height:40px;
+}
+input[type="number"]{width:76px;text-align:right;}
+textarea{width:100%;min-height:74px;resize:vertical;}
+select{min-width:0;}
+.num-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.num-row .lbl{width:64px;flex:none;}
+.stepper{display:inline-flex;border:1px solid var(--sep);border-radius:9px;overflow:hidden;}
+.stepper button{width:38px;height:40px;border:none;background:#f8f8fa;font-size:18px;}
+.stepper button:active{background:#ececf1;}
+input[type="range"]{flex:1;accent-color:var(--accent);}
+.seg{display:flex;background:#e9e9ef;border-radius:10px;padding:2px;margin-bottom:14px;}
+.seg button{flex:1;border:none;background:transparent;padding:7px 0;border-radius:8px;font-size:15px;color:var(--text);}
+.seg button.on{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+#tabbar{
+  position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--sep);display:none;z-index:30;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar.show{display:block;}
+#tabbar .inner{max-width:680px;margin:0 auto;display:flex;}
+#tabbar button{
+  flex:1;border:none;background:none;padding:8px 0 10px;font-size:12px;color:var(--sub);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+#tabbar button .ic{font-size:21px;line-height:1;}
+#tabbar button.on{color:var(--accent);font-weight:600;}
+.checkbox{width:24px;height:24px;border-radius:50%;border:2px solid #c7c7cc;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+.checkbox.on{background:var(--accent);border-color:var(--accent);}
+.bar-track{height:6px;background:rgba(120,120,128,.14);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--accent);border-radius:3px;}
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;
+  align-items:flex-end;justify-content:center;
+}
+.modal-card{
+  background:#fff;width:100%;max-width:680px;max-height:88dvh;overflow-y:auto;
+  border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.modal-card h3{margin:2px 0 12px;font-size:17px;}
+.modal-card .field{margin-bottom:12px;}
+.modal-card label.flabel{display:block;font-size:13px;color:var(--sub);margin-bottom:4px;}
+.sheet-btn{display:block;width:100%;text-align:center;padding:13px;border:none;background:none;font-size:16.5px;border-bottom:1px solid var(--sep);color:var(--text);}
+.sheet-btn:last-child{border-bottom:none;}
+.sheet-btn.danger{color:var(--red);}
+#toast{
+  position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);
+  background:rgba(30,30,34,.92);color:#fff;padding:10px 18px;border-radius:999px;font-size:14.5px;
+  opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:88vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty{padding:44px 20px;text-align:center;color:var(--sub);}
+.empty .big-ic{font-size:42px;margin-bottom:8px;}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+canvas#chart{width:100%;height:190px;display:block;}
+.kv-num{font-weight:700;}
+a{color:var(--accent);}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="screen"></main>
+</div>
+<nav id="tabbar"><div class="inner">
+  <button id="tab-list"><span class="ic">☰</span>リスト</button>
+  <button id="tab-stats"><span class="ic">📊</span>統計</button>
+</div></nav>
+<input type="file" id="fileInput" hidden accept=".csv,.tsv,.txt,.zip" multiple>
+<input type="file" id="jsonInput" hidden accept=".json,application/json">
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   正誤トレーナー Web版（iOS版 SeigoTrainer の移植）
+   データは端末内（IndexedDB）にのみ保存されます。
+   ============================================================ */
+
+// ---------- ユーティリティ ----------
+function $(sel, root){ return (root||document).querySelector(sel); }
+function $$(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function uuid(){
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+function dayKeyOf(date){
+  const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,"0"), d = String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+function dateLabelOf(key){
+  const parts = key.split("-").map(Number);
+  if (parts.length !== 3) return key;
+  const dt = new Date(parts[0], parts[1]-1, parts[2]);
+  const w = ["日","月","火","水","木","金","土"][dt.getDay()];
+  let s = `${parts[1]}月${parts[2]}日（${w}）`;
+  if (key === dayKeyOf(new Date())) s = "今日 ・ " + s;
+  return s;
+}
+function scoreText(v){ return v > 0 ? "+" + v : String(v); }
+function scoreClass(v){ return v > 0 ? "score-pos" : (v < 0 ? "score-neg" : "score-zero"); }
+let toastTimer = null;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+// ---------- CSV 解析（iOS版 CSVParser の移植） ----------
+function decodeCSV(data){
+  const u8 = new Uint8Array(data);
+  if (u8.length >= 2 && u8[0] === 0xFF && u8[1] === 0xFE) {
+    return new TextDecoder("utf-16le").decode(data).replace(/^\uFEFF/, "");
+  }
+  if (u8.length >= 2 && u8[0] === 0xFE && u8[1] === 0xFF) {
+    return new TextDecoder("utf-16be").decode(data).replace(/^\uFEFF/, "");
+  }
+  try {
+    return new TextDecoder("utf-8", {fatal:true}).decode(data).replace(/^\uFEFF/, "");
+  } catch(e) {
+    try {
+      return new TextDecoder("shift-jis").decode(data).replace(/^\uFEFF/, "");
+    } catch(e2) {
+      return null;
+    }
+  }
+}
+function delimiterCandidates(text){
+  const all = [",", "\t", ";", "，"];
+  const counts = {",":0, "\t":0, ";":0, "，":0};
+  const sample = text.slice(0, 4000);
+  for (const ch of sample) { if (all.includes(ch)) counts[ch]++; }
+  return all.slice().sort((a,b)=>counts[b]-counts[a]);
+}
+function parseRows(text, delimiter){
+  const rows = []; let row = []; let field = ""; let inQuotes = false;
+  const chars = Array.from(text); // コードポイント単位
+  let i = 0;
+  const endField = ()=>{ row.push(field); field = ""; };
+  const endRow = ()=>{ endField(); rows.push(row); row = []; };
+  while (i < chars.length){
+    const c = chars[i];
+    if (inQuotes){
+      if (c === '"'){
+        if (i+1 < chars.length && chars[i+1] === '"'){ field += '"'; i += 2; continue; }
+        inQuotes = false; i += 1; continue;
+      }
+      field += c; i += 1; continue;
+    } else {
+      if (c === '"' && field === ""){ inQuotes = true; i += 1; continue; }
+      if (c === delimiter){ endField(); i += 1; continue; }
+      if (c === "\r"){ if (i+1 < chars.length && chars[i+1] === "\n") i += 1; endRow(); i += 1; continue; }
+      if (c === "\n"){ endRow(); i += 1; continue; }
+      field += c; i += 1; continue;
+    }
+  }
+  if (field !== "" || row.length > 0) endRow();
+  return rows;
+}
+function questionsFromRows(rows){
+  const questions = []; let sequential = 0;
+  rows.forEach((row, index)=>{
+    if (row.length < 2) return;
+    const first = row[0].trim();
+    if (index === 0 && !/^-?\d+$/.test(first)) return; // ヘッダー行
+    const front = row[1];
+    if (front.trim() === "") return;
+    sequential += 1;
+    const num = /^-?\d+$/.test(first) ? parseInt(first, 10) : sequential;
+    questions.push({
+      n: num, f: front, b: row.length > 2 ? row[2] : "", e: row.length > 3 ? row[3] : "",
+      sec: null, star: false
+    });
+  });
+  return questions;
+}
+function parseCSVBytes(data){
+  const u8 = new Uint8Array(data);
+  if (u8.length === 0) throw new Error("ファイルの中身が空でした");
+  if (u8.length >= 2 && u8[0] === 0x50 && u8[1] === 0x4B) throw new Error("ZIPファイルが選ばれています。解凍して中身のCSVファイルを選んでください");
+  if (u8.length >= 4 && u8[0] === 0x25 && u8[1] === 0x50 && u8[2] === 0x44 && u8[3] === 0x46) throw new Error("PDFファイルが選ばれています。CSVファイルを選んでください");
+  const text = decodeCSV(data);
+  if (text === null) throw new Error("ファイルの文字コードを読み取れませんでした（UTF-8 / UTF-16 / Shift_JIS に対応しています）");
+  let bestRows = 0;
+  for (const delim of delimiterCandidates(text)){
+    const rows = parseRows(text, delim);
+    bestRows = Math.max(bestRows, rows.length);
+    const qs = questionsFromRows(rows);
+    if (qs.length > 0) return qs;
+  }
+  throw new Error(`問題が1件も見つかりませんでした。形式（番号,表面,裏面,解説）を確認してください（読み取れた行数：${bestRows}、ファイルサイズ：${u8.length}バイト）`);
+}
+
+// ---------- ZIP 読み取り（最小実装：stored / deflate） ----------
+async function unzipEntries(data){
+  const u8 = new Uint8Array(data);
+  const dv = new DataView(data);
+  // End of Central Directory を末尾から探す
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= 0 && i >= u8.length - 22 - 66000; i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("ZIPファイルの形式を読み取れませんでした");
+  const count = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const entries = [];
+  const dec = new TextDecoder("utf-8");
+  for (let k = 0; k < count; k++){
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const compSize = dv.getUint32(off + 20, true);
+    const nameLen = dv.getUint16(off + 28, true);
+    const extraLen = dv.getUint16(off + 30, true);
+    const commentLen = dv.getUint16(off + 32, true);
+    const localOff = dv.getUint32(off + 42, true);
+    const name = dec.decode(u8.slice(off + 46, off + 46 + nameLen));
+    off += 46 + nameLen + extraLen + commentLen;
+    if (name.endsWith("/")) continue;
+    // ローカルヘッダからデータ開始位置を求める
+    const lNameLen = dv.getUint16(localOff + 26, true);
+    const lExtraLen = dv.getUint16(localOff + 28, true);
+    const dataStart = localOff + 30 + lNameLen + lExtraLen;
+    const comp = u8.slice(dataStart, dataStart + compSize);
+    let bytes;
+    if (method === 0){
+      bytes = comp;
+    } else if (method === 8){
+      const stream = new Blob([comp]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+    } else {
+      continue; // 未対応の圧縮形式はスキップ
+    }
+    entries.push({name, data: bytes});
+  }
+  return entries;
+}
+
+// ---------- 出題形式の判定（iOS版 answerMode の移植） ----------
+const CIRCLED = ["①","②","③","④","⑤","⑥"];
+function answerMode(q){
+  const back = (q.b || "").trim();
+  if (back.length === 1 && CIRCLED.includes(back)){
+    const present = CIRCLED.filter(c => (q.f || "").includes(c));
+    const options = present.length ? present : ["①","②","③","④"];
+    if (options.includes(back)) return {type:"choice", options, correct: back};
+  }
+  if (back === "○" || back === "×") return {type:"choice", options:["○","×"], correct: back};
+  return {type:"reveal", correct: back};
+}
+</script>
+<script>
+"use strict";
+// ---------- データ保存（IndexedDB、使えない環境では localStorage） ----------
+let DB = { sets: [], daily: {}, settings: { statsEnabled: false, shuffle: {} } };
+let idb = null;
+function openIDB(){
+  return new Promise((res, rej)=>{
+    const r = indexedDB.open("seigotrainer-web", 1);
+    r.onupgradeneeded = ()=>{ r.result.createObjectStore("kv"); };
+    r.onsuccess = ()=>res(r.result);
+    r.onerror = ()=>rej(r.error);
+  });
+}
+function normalizeDB(v){
+  const d = { sets: [], daily: {}, settings: { statsEnabled: false, shuffle: {} } };
+  if (v && typeof v === "object"){
+    if (Array.isArray(v.sets)) d.sets = v.sets;
+    if (v.daily && typeof v.daily === "object") d.daily = v.daily;
+    if (v.settings){
+      d.settings.statsEnabled = !!v.settings.statsEnabled;
+      if (v.settings.shuffle && typeof v.settings.shuffle === "object") d.settings.shuffle = v.settings.shuffle;
+    }
+  }
+  return d;
+}
+async function loadDB(){
+  try {
+    idb = await openIDB();
+    const val = await new Promise((res, rej)=>{
+      const req = idb.transaction("kv").objectStore("kv").get("main");
+      req.onsuccess = ()=>res(req.result);
+      req.onerror = ()=>rej(req.error);
+    });
+    if (val) DB = normalizeDB(val);
+  } catch(e) {
+    idb = null;
+    try {
+      const raw = localStorage.getItem("seigotrainer-web");
+      if (raw) DB = normalizeDB(JSON.parse(raw));
+    } catch(e2) { /* 空のまま開始 */ }
+  }
+}
+let saveTimer = null;
+function saveDB(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    if (idb){
+      try { idb.transaction("kv", "readwrite").objectStore("kv").put(DB, "main"); } catch(e) { /* noop */ }
+    } else {
+      try { localStorage.setItem("seigotrainer-web", JSON.stringify(DB)); } catch(e) { /* 容量超過などは無視 */ }
+    }
+  }, 120);
+}
+
+// ---------- セット操作 ----------
+function getSet(id){ return DB.sets.find(s => s.id === id) || null; }
+function statOf(set, n){ return set.stats[String(n)] || {c:0, w:0, last:null, score:0}; }
+function wrongRemaining(set){ return set.questions.filter(q => statOf(set, q.n).score < 0).length; }
+function starredCount(set){ return set.questions.filter(q => q.star).length; }
+function addSet(name, questions, sections){
+  const set = { id: uuid(), name, createdAt: new Date().toISOString(), sections: sections || [], questions, stats: {} };
+  DB.sets.push(set); saveDB(); return set;
+}
+function deleteSet(id){
+  DB.sets = DB.sets.filter(s => s.id !== id);
+  if (DB.settings.shuffle) delete DB.settings.shuffle[id];
+  saveDB();
+}
+function duplicateSet(id){
+  const s = getSet(id); if (!s) return;
+  const copy = JSON.parse(JSON.stringify(s));
+  copy.id = uuid(); copy.name = s.name + " のコピー"; copy.createdAt = new Date().toISOString();
+  DB.sets.push(copy); saveDB();
+}
+function combineSets(ids, filter, name){
+  const chosen = ids.map(getSet).filter(Boolean);
+  if (!chosen.length) return 0;
+  const sections = []; const raw = [];
+  for (const set of chosen){
+    for (const s of set.sections) if (!sections.includes(s)) sections.push(s);
+    let qs = set.questions;
+    if (filter === "wrong") qs = qs.filter(q => statOf(set, q.n).score < 0);
+    if (filter === "starred") qs = qs.filter(q => q.star);
+    raw.push(...qs);
+  }
+  if (!raw.length) return 0;
+  for (const q of raw) if (q.sec && !sections.includes(q.sec)) sections.push(q.sec);
+  const combined = raw.map((q, i)=>({ n: i+1, f: q.f, b: q.b, e: q.e, sec: q.sec || null, star: !!q.star }));
+  addSet(name, combined, sections);
+  return combined.length;
+}
+function recordResult(set, qn, correct){
+  const key = String(qn);
+  const st = set.stats[key] || (set.stats[key] = {c:0, w:0, last:null, score:0});
+  if (correct){ st.c++; st.score++; } else { st.w++; st.score--; }
+  st.last = correct;
+  DailyStats.record(correct);
+  saveDB();
+}
+const DailyStats = {
+  record(correct){
+    if (!DB.settings.statsEnabled) return;
+    const key = dayKeyOf(new Date());
+    const d = DB.daily[key] || (DB.daily[key] = {a:0, c:0, w:0});
+    d.a++; if (correct) d.c++; else d.w++;
+  }
+};
+function assignSectionRange(set, name, from, to){
+  const lo = Math.min(from, to), hi = Math.max(from, to);
+  set.questions.forEach(q => { if (q.n >= lo && q.n <= hi) q.sec = name; });
+  saveDB();
+}
+function deleteSection(set, name){
+  set.sections = set.sections.filter(s => s !== name);
+  set.questions.forEach(q => { if (q.sec === name) q.sec = null; });
+  saveDB();
+}
+function renameSection(set, oldName, newName){
+  const i = set.sections.indexOf(oldName);
+  if (i >= 0) set.sections[i] = newName;
+  set.questions.forEach(q => { if (q.sec === oldName) q.sec = newName; });
+  saveDB();
+}
+
+// ---------- モーダル ----------
+function openModal(html){
+  $("#modalRoot").innerHTML = `<div class="modal-overlay" id="modalOverlay"><div class="modal-card">${html}</div></div>`;
+  $("#modalOverlay").addEventListener("click", e => { if (e.target.id === "modalOverlay") closeModal(); });
+}
+function closeModal(){ $("#modalRoot").innerHTML = ""; }
+function modalConfirm(title, message, okLabel){
+  return new Promise(res => {
+    openModal(`<h3>${esc(title)}</h3><p class="small">${esc(message)}</p>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn block" id="mcCancel">キャンセル</button>
+        <button class="btn primary block" id="mcOk">${esc(okLabel || "OK")}</button>
+      </div>`);
+    $("#mcCancel").onclick = ()=>{ closeModal(); res(false); };
+    $("#mcOk").onclick = ()=>{ closeModal(); res(true); };
+  });
+}
+function modalPrompt(title, initial, placeholder){
+  return new Promise(res => {
+    openModal(`<h3>${esc(title)}</h3>
+      <input type="text" id="mpInput" value="${esc(initial || "")}" placeholder="${esc(placeholder || "")}" style="width:100%;">
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn block" id="mpCancel">キャンセル</button>
+        <button class="btn primary block" id="mpOk">決定</button>
+      </div>`);
+    const inp = $("#mpInput"); inp.focus(); inp.select();
+    $("#mpCancel").onclick = ()=>{ closeModal(); res(null); };
+    $("#mpOk").onclick = ()=>{ const v = inp.value.trim(); closeModal(); res(v); };
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") $("#mpOk").click(); });
+  });
+}
+function modalNotice(title, lines){
+  return new Promise(res => {
+    openModal(`<h3>${esc(title)}</h3>
+      ${lines.map(l => `<p class="small">${esc(l)}</p>`).join("")}
+      <div style="margin-top:14px;"><button class="btn primary block" id="mnOk">OK</button></div>`);
+    $("#mnOk").onclick = ()=>{ closeModal(); res(); };
+  });
+}
+
+// ---------- 画面遷移 ----------
+let nav = [{screen:"list"}];
+function current(){ return nav[nav.length - 1]; }
+function navigate(screen, setId){
+  nav.push({screen, setId: setId !== undefined ? setId : (current() ? current().setId : null)});
+  render();
+}
+function goBack(){ if (nav.length > 1) nav.pop(); render(); }
+function goRoot(screen){ nav = [{screen}]; render(); }
+function render(){
+  const c = current();
+  const main = $("#screen");
+  const isRoot = c.screen === "list" || c.screen === "stats";
+  $("#tabbar").classList.toggle("show", isRoot);
+  main.classList.toggle("with-tab", isRoot);
+  $("#tab-list").classList.toggle("on", c.screen === "list");
+  $("#tab-stats").classList.toggle("on", c.screen === "stats");
+  window.scrollTo(0, 0);
+  switch(c.screen){
+    case "list": renderList(main); break;
+    case "stats": renderStats(main); break;
+    case "setup": renderSetup(main); break;
+    case "quiz": renderQuiz(main); break;
+    case "qlist": renderQList(main); break;
+    case "sections": renderSections(main); break;
+    case "scoped": renderScoped(main); break;
+  }
+}
+function backBar(title){
+  return `<div class="topbar"><button class="icon-btn" id="btnBack" aria-label="戻る">‹</button><span class="set-name">${esc(title || "")}</span><span class="spacer"></span></div>`;
+}
+function wireBack(){ const b = $("#btnBack"); if (b) b.onclick = goBack; }
+</script>
+<script>
+"use strict";
+// ---------- リスト画面 ----------
+let listSelectMode = false;
+let listSelected = new Set();
+function setSubLine(set){
+  const d = new Date(set.createdAt);
+  const dateStr = isNaN(d) ? "" : `${d.getMonth()+1}月${d.getDate()}日`;
+  let s = `${dateStr} ・ ${set.questions.length}問`;
+  const w = wrongRemaining(set);
+  if (w > 0) s += ` ・ 間違い残り ${w}問`;
+  const st = starredCount(set);
+  if (st > 0) s += ` ・ スター ${st}問`;
+  return s;
+}
+function renderList(main){
+  const sets = DB.sets;
+  let html = `<div class="topbar"><span class="spacer"></span>
+    ${sets.length ? `<button class="btn small" id="btnSelectMode">${listSelectMode ? "キャンセル" : "選択"}</button>` : ""}
+    <button class="btn small primary" id="btnAdd">＋ 追加</button></div>`;
+  if (listSelectMode){
+    html += `<div class="card">
+      <div class="row"><div class="grow"><strong>${listSelected.size}件 選択中</strong><div class="sub">選んだリストをまとめて新しいリストを作ります（元のリストは残ります）</div></div></div>
+      <div style="display:flex;gap:8px;padding:10px 0 6px;flex-wrap:wrap;">
+        <button class="btn" id="btnCombineAll" ${listSelected.size ? "" : "disabled"}>全部で作る</button>
+        <button class="btn" id="btnCombineWrong" ${listSelected.size ? "" : "disabled"}>間違いだけで作る</button>
+        <button class="btn" id="btnCombineStar" ${listSelected.size ? "" : "disabled"}>スターだけで作る</button>
+      </div></div>`;
+  }
+  if (!sets.length){
+    html += `<div class="card empty"><div class="big-ic">🗂️</div>
+      <div><strong>リストがありません</strong></div>
+      <p class="small">「＋ 追加」からCSVファイル（番号,表面,裏面,解説）を読み込むと、ここにリストができます。ZIPファイル（中のCSVがそれぞれリストになります）も読み込めます。</p></div>`;
+  } else {
+    html += `<div class="card flush">` + sets.map(set => `
+      <div class="row set-row" data-set="${set.id}" style="padding-left:14px;padding-right:8px;">
+        ${listSelectMode ? `<span class="checkbox ${listSelected.has(set.id) ? "on" : ""}">${listSelected.has(set.id) ? "✓" : ""}</span>` : ""}
+        <div class="grow">
+          <div class="set-name">${esc(set.name)}</div>
+          <div class="sub">${esc(setSubLine(set))}</div>
+        </div>
+        ${listSelectMode ? "" : `<button class="icon-btn" data-menu="${set.id}" aria-label="メニュー">⋯</button>`}
+      </div>`).join("") + `</div>`;
+  }
+  html += `<div class="section-label">データ</div>
+    <div class="card">
+      <div class="row"><div class="grow">バックアップ</div><button class="btn small" id="btnExport">書き出し</button><button class="btn small" id="btnImportJson">読み込み</button></div>
+      <div class="row"><div class="grow"><div>ホーム画面に追加</div><div class="sub">Android（Chrome）: メニュー ︙ →「ホーム画面に追加」／ iPhone（Safari）: 共有 →「ホーム画面に追加」。アプリのように起動でき、オフラインでも使えます。</div></div></div>
+      <div class="row"><div class="grow sub">データはこの端末のブラウザ内にだけ保存されます。ブラウザのデータを消すと消えるので、ときどき「書き出し」でバックアップしてください。</div></div>
+    </div>
+    <p class="caption" style="text-align:center;">正誤トレーナー Web版</p>`;
+  main.innerHTML = html;
+
+  $("#btnAdd").onclick = ()=> $("#fileInput").click();
+  const sm = $("#btnSelectMode");
+  if (sm) sm.onclick = ()=>{ listSelectMode = !listSelectMode; listSelected.clear(); render(); };
+  $$(".set-row", main).forEach(rowEl => {
+    rowEl.addEventListener("click", e => {
+      if (e.target.closest("[data-menu]")) return;
+      const id = rowEl.dataset.set;
+      if (listSelectMode){
+        if (listSelected.has(id)) listSelected.delete(id); else listSelected.add(id);
+        render();
+      } else {
+        navigate("setup", id);
+      }
+    });
+  });
+  $$("[data-menu]", main).forEach(btn => {
+    btn.addEventListener("click", ()=> openSetMenu(btn.dataset.menu));
+  });
+  const combine = async (filter) => {
+    const name = await modalPrompt("新しいリストの名前", "結合セット");
+    if (name === null) return;
+    const count = combineSets(Array.from(listSelected), filter, name || "結合セット");
+    if (count > 0){
+      listSelectMode = false; listSelected.clear();
+      toast(`${count}問のリストを作りました`);
+      render();
+    } else {
+      await modalNotice("作れませんでした", ["対象の問題がありませんでした。"]);
+    }
+  };
+  const ca = $("#btnCombineAll"); if (ca) ca.onclick = ()=>combine("all");
+  const cw = $("#btnCombineWrong"); if (cw) cw.onclick = ()=>combine("wrong");
+  const cs = $("#btnCombineStar"); if (cs) cs.onclick = ()=>combine("starred");
+  $("#btnExport").onclick = exportJSON;
+  $("#btnImportJson").onclick = ()=> $("#jsonInput").click();
+}
+function openSetMenu(id){
+  const set = getSet(id); if (!set) return;
+  openModal(`<h3>${esc(set.name)}</h3>
+    <button class="sheet-btn" id="smRename">名前を変更</button>
+    <button class="sheet-btn" id="smDup">複製</button>
+    <button class="sheet-btn danger" id="smDelete">削除</button>
+    <button class="sheet-btn" id="smCancel">キャンセル</button>`);
+  $("#smCancel").onclick = closeModal;
+  $("#smRename").onclick = async ()=>{
+    closeModal();
+    const name = await modalPrompt("リストの名前", set.name);
+    if (name){ set.name = name; saveDB(); render(); }
+  };
+  $("#smDup").onclick = ()=>{ duplicateSet(id); closeModal(); toast("複製しました"); render(); };
+  $("#smDelete").onclick = async ()=>{
+    closeModal();
+    if (await modalConfirm("リストを削除", `「${set.name}」と、その成績データを削除します。よろしいですか？`, "削除")){
+      deleteSet(id); toast("削除しました"); render();
+    }
+  };
+}
+// ---------- ファイル読み込み ----------
+function baseName(name){ return name.replace(/\.[^.]+$/, ""); }
+async function handleFiles(files){
+  const added = []; const failures = [];
+  for (const file of files){
+    try {
+      const buf = await file.arrayBuffer();
+      const u8 = new Uint8Array(buf);
+      const isZip = /\.zip$/i.test(file.name) || (u8.length >= 2 && u8[0] === 0x50 && u8[1] === 0x4B);
+      if (isZip){
+        const entries = await unzipEntries(buf);
+        const targets = entries.filter(en => /\.(csv|tsv|txt)$/i.test(en.name) && !en.name.startsWith("__MACOSX"));
+        if (!targets.length) throw new Error("ZIPの中にCSVファイルが見つかりませんでした");
+        for (const en of targets){
+          try {
+            const qs = parseCSVBytes(en.data.buffer.slice(en.data.byteOffset, en.data.byteOffset + en.data.byteLength));
+            addSet(baseName(en.name.split("/").pop()), qs);
+            added.push(en.name);
+          } catch(e) { failures.push(`${en.name}: ${e.message}`); }
+        }
+      } else {
+        const qs = parseCSVBytes(buf);
+        addSet(baseName(file.name), qs);
+        added.push(file.name);
+      }
+    } catch(e) {
+      failures.push(`${file.name}: ${e.message}`);
+    }
+  }
+  if (added.length) toast(`${added.length}件のリストを追加しました`);
+  if (failures.length) await modalNotice("読み込めなかったファイル", failures);
+  render();
+}
+function exportJSON(){
+  const payload = JSON.stringify({ app:"seigotrainer-web", version:1, sets: DB.sets, daily: DB.daily, settings: DB.settings }, null, 2);
+  const blob = new Blob([payload], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "seigotrainer-backup.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+async function handleJSONFile(file){
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if (!parsed || !Array.isArray(parsed.sets)) throw new Error("正誤トレーナーのバックアップファイルではないようです");
+    if (!(await modalConfirm("データを読み込み", "今のデータはすべて、読み込む内容で置き換わります。よろしいですか？", "読み込む"))) return;
+    DB = normalizeDB(parsed);
+    saveDB();
+    listSelectMode = false; listSelected.clear();
+    toast("読み込みました");
+    goRoot("list");
+  } catch(e) {
+    await modalNotice("読み込めませんでした", [e.message]);
+  }
+}
+</script>
+<script>
+"use strict";
+// ---------- 出題設定 ----------
+let SU = null;
+function newSetupState(set){
+  const nums = set.questions.map(q => q.n);
+  return {
+    setId: set.id, mode: "quiz",
+    secFilter: "",
+    rMin: nums.length ? Math.min.apply(null, nums) : 1,
+    rMax: nums.length ? Math.max.apply(null, nums) : 1,
+    starOnly: false,
+    vOn: false, vMin: -100, vMax: -1,
+    expSec: false, expRange: false, expValue: false
+  };
+}
+function matchesSection(su, q){
+  if (su.secFilter === "") return true;
+  if (su.secFilter === "__unassigned__") return !q.sec;
+  return q.sec === su.secFilter;
+}
+function scopedQuestions(set, su){
+  let qs = set.questions.filter(q => matchesSection(su, q));
+  qs = qs.filter(q => q.n >= su.rMin && q.n <= su.rMax);
+  if (su.starOnly) qs = qs.filter(q => q.star);
+  if (su.vOn) qs = qs.filter(q => { const sc = statOf(set, q.n).score; return sc >= su.vMin && sc <= su.vMax; });
+  return qs;
+}
+function switchHTML(id, checked){
+  return `<label class="switch"><input type="checkbox" id="${id}" ${checked ? "checked" : ""}><span class="track"></span></label>`;
+}
+function discHTML(id, title, valueText, expanded, bodyHTML){
+  return `<div class="disc">
+    <button class="disc-head" data-disc="${id}"><span>${esc(title)}</span><span class="val">${esc(valueText)}</span><span class="chev">${expanded ? "▾" : "▸"}</span></button>
+    ${expanded ? `<div class="disc-body">${bodyHTML}</div>` : ""}
+  </div>`;
+}
+function numRowHTML(label, key, value, min, max){
+  return `<div class="num-row"><span class="lbl">${esc(label)}</span>
+    <input type="range" data-range="${key}" min="${min}" max="${max}" value="${value}">
+    <input type="number" data-num="${key}" value="${value}">
+    <span class="stepper"><button data-step="${key}|-1">−</button><button data-step="${key}|1">＋</button></span></div>`;
+}
+function renderSetup(main){
+  const set = getSet(current().setId);
+  if (!set){ main.innerHTML = `<div class="card empty">リストが見つかりません</div>`; return; }
+  if (!SU || SU.setId !== set.id) SU = newSetupState(set);
+  const su = SU;
+  const scoped = scopedQuestions(set, su);
+  const shuffle = DB.settings.shuffle[set.id] !== false;
+  const nums = set.questions.map(q => q.n);
+  const fullMin = nums.length ? Math.min.apply(null, nums) : 1;
+  const fullMax = nums.length ? Math.max.apply(null, nums) : 1;
+  const hasUnassigned = set.questions.some(q => !q.sec);
+
+  let html = backBar(set.name);
+  html += `<div class="card">
+    <div class="row"><div class="grow"><div class="set-name">${esc(set.name)}</div>
+    <div class="sub">${esc(setSubLine(set))}</div></div></div></div>`;
+  html += `<div class="seg">
+    <button id="segQuiz" class="${su.mode === "quiz" ? "on" : ""}">出題モード</button>
+    <button id="segEdit" class="${su.mode === "edit" ? "on" : ""}">編集モード</button></div>`;
+
+  if (su.mode === "edit"){
+    html += `<div class="card flush">
+      <div class="row set-row" id="goQList" style="padding-left:14px;padding-right:14px;"><div class="grow">問題一覧・編集</div><span class="sub">›</span></div>
+      <div class="row set-row" id="goSections" style="padding-left:14px;padding-right:14px;"><div class="grow">セクションを管理</div><span class="sub">›</span></div>
+    </div>`;
+    main.innerHTML = html;
+    wireBack();
+    $("#segQuiz").onclick = ()=>{ su.mode = "quiz"; render(); };
+    $("#segEdit").onclick = ()=>{ su.mode = "edit"; render(); };
+    $("#goQList").onclick = ()=> navigate("qlist", set.id);
+    $("#goSections").onclick = ()=> navigate("sections", set.id);
+    return;
+  }
+
+  // 絞り込み（スター）
+  let body = `<div class="card">`;
+  body += `<div class="row"><div class="grow">スター付きのみ</div>${switchHTML("swStar", su.starOnly)}</div>`;
+  if (su.starOnly && !set.questions.some(q => q.star && matchesSection(su, q)))
+    body += `<div class="caption" style="padding-bottom:10px;">スター付きの問題はまだありません</div>`;
+  body += `</div>`;
+
+  // セクションで絞り込む
+  if (set.sections.length){
+    const cur = su.secFilter === "" ? "すべて" : (su.secFilter === "__unassigned__" ? "未分類" : su.secFilter);
+    let rows = [`<div class="row set-row" data-sec=""><div class="grow">すべて</div>${su.secFilter === "" ? "<span>✓</span>" : ""}</div>`];
+    for (const name of set.sections)
+      rows.push(`<div class="row set-row" data-sec="${esc(name)}"><div class="grow">${esc(name)}</div>${su.secFilter === name ? "<span>✓</span>" : ""}</div>`);
+    if (hasUnassigned)
+      rows.push(`<div class="row set-row" data-sec="__unassigned__"><div class="grow">未分類</div>${su.secFilter === "__unassigned__" ? "<span>✓</span>" : ""}</div>`);
+    body += `<div class="card">${discHTML("sec", "セクションで絞り込む", cur, su.expSec, rows.join(""))}</div>`;
+  }
+
+  // 範囲指定
+  body += `<div class="card">${discHTML("range", "範囲指定", `${su.rMin}〜${su.rMax}`, su.expRange,
+    numRowHTML("開始", "rMin", su.rMin, fullMin, fullMax) + numRowHTML("終了", "rMax", su.rMax, fullMin, fullMax))}</div>`;
+
+  // 値で絞り込む
+  const valBody = `<div class="row"><div class="grow">値で絞り込む</div>${switchHTML("swValue", su.vOn)}</div>
+    <div class="num-row"><span class="lbl">最小値</span>
+      <input type="number" data-num="vMin" value="${su.vMin}">
+      <span class="stepper"><button data-step="vMin|-1">−</button><button data-step="vMin|1">＋</button></span></div>
+    <div class="num-row"><span class="lbl">最大値</span>
+      <input type="number" data-num="vMax" value="${su.vMax}">
+      <span class="stepper"><button data-step="vMax|-1">−</button><button data-step="vMax|1">＋</button></span></div>
+    ${su.vOn && !set.questions.some(q => matchesSection(su, q) && statOf(set, q.n).score >= su.vMin && statOf(set, q.n).score <= su.vMax) ? `<div class="caption">その範囲の値の問題はまだありません</div>` : ""}`;
+  body += `<div class="card">${discHTML("value", "値で絞り込む", su.vOn ? `${su.vMin}〜${su.vMax}` : "オフ", su.expValue, valBody)}</div>`;
+
+  // シャッフル・対象一覧・開始
+  body += `<div class="card">
+    <div class="row"><div class="grow">シャッフル</div>${switchHTML("swShuffle", shuffle)}</div>
+    <div class="row set-row" id="goScoped"><div class="grow">対象の問題一覧</div><span class="sub" id="scopedCount">${scoped.length}問 ›</span></div>
+  </div>`;
+  body += `<button class="btn primary big" id="btnStart" ${scoped.length ? "" : "disabled"}>出題をはじめる（<span id="startCount">${scoped.length}</span>問）</button>`;
+  html += body;
+  main.innerHTML = html;
+  wireBack();
+  $("#segQuiz").onclick = ()=>{ su.mode = "quiz"; render(); };
+  $("#segEdit").onclick = ()=>{ su.mode = "edit"; render(); };
+
+  $$("[data-disc]", main).forEach(btn => {
+    btn.onclick = ()=>{
+      const k = btn.dataset.disc;
+      if (k === "sec") su.expSec = !su.expSec;
+      if (k === "range") su.expRange = !su.expRange;
+      if (k === "value") su.expValue = !su.expValue;
+      render();
+    };
+  });
+  $$("[data-sec]", main).forEach(rowEl => {
+    rowEl.onclick = ()=>{ su.secFilter = rowEl.dataset.sec; render(); };
+  });
+  const swStar = $("#swStar"); if (swStar) swStar.onchange = ()=>{ su.starOnly = swStar.checked; render(); };
+  const swValue = $("#swValue"); if (swValue) swValue.onchange = ()=>{ su.vOn = swValue.checked; render(); };
+  const swShuffle = $("#swShuffle"); if (swShuffle) swShuffle.onchange = ()=>{ DB.settings.shuffle[set.id] = swShuffle.checked; saveDB(); };
+
+  const clampSu = ()=>{
+    su.rMin = Math.max(fullMin, Math.min(su.rMin, fullMax));
+    su.rMax = Math.max(fullMin, Math.min(su.rMax, fullMax));
+    if (su.rMin > su.rMax) su.rMax = su.rMin;
+    su.vMin = Math.max(-999, Math.min(su.vMin, 999));
+    su.vMax = Math.max(-999, Math.min(su.vMax, 999));
+    if (su.vMin > su.vMax) su.vMax = su.vMin;
+  };
+  $$("[data-num]", main).forEach(inp => {
+    inp.onchange = ()=>{
+      const v = parseInt(inp.value, 10);
+      if (!isNaN(v)) su[inp.dataset.num] = v;
+      clampSu(); render();
+    };
+  });
+  $$("[data-range]", main).forEach(sl => {
+    sl.oninput = ()=>{
+      su[sl.dataset.range] = parseInt(sl.value, 10);
+      if (su.rMin > su.rMax){ if (sl.dataset.range === "rMin") su.rMax = su.rMin; else su.rMin = su.rMax; }
+      const pair = $(`[data-num="${sl.dataset.range}"]`, main);
+      if (pair) pair.value = su[sl.dataset.range];
+      const now = scopedQuestions(set, su).length;
+      const sc1 = $("#startCount"); if (sc1) sc1.textContent = now;
+      const sc2 = $("#scopedCount"); if (sc2) sc2.textContent = `${now}問 ›`;
+      const bs = $("#btnStart"); if (bs) bs.disabled = now === 0;
+    };
+    sl.onchange = ()=> render();
+  });
+  $$("[data-step]", main).forEach(btn => {
+    btn.onclick = ()=>{
+      const [key, d] = btn.dataset.step.split("|");
+      su[key] = (su[key] || 0) + parseInt(d, 10);
+      clampSu(); render();
+    };
+  });
+  $("#goScoped").onclick = ()=> navigate("scoped", set.id);
+  $("#btnStart").onclick = ()=>{
+    let session = scopedQuestions(set, su).slice();
+    if (DB.settings.shuffle[set.id] !== false){
+      for (let i = session.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [session[i], session[j]] = [session[j], session[i]];
+      }
+    }
+    initQuiz(set.id, session);
+    navigate("quiz", set.id);
+  };
+}
+
+// ---------- 対象の問題一覧 ----------
+function questionRowHTML(set, q, opts){
+  opts = opts || {};
+  const st = statOf(set, q.n);
+  return `<div class="row" ${opts.rowAttrs || ""} style="padding-left:14px;padding-right:14px;">
+    ${opts.starBtn ? `<button class="star-btn" data-star="${q.n}" style="font-size:22px;padding:2px 4px;">${q.star ? `<span class="star-on">★</span>` : `<span class="star-off">☆</span>`}</button>` : (q.star ? `<span class="star-on">★</span>` : "")}
+    <div class="grow">
+      <div class="small"><span class="sub">No.${q.n}</span> <span class="badge-score ${scoreClass(st.score)}">${scoreText(st.score)}</span></div>
+      <div class="clamp2">${esc(q.f)}</div>
+      ${q.sec ? `<div class="caption">${esc(q.sec)}</div>` : ""}
+    </div>
+    ${opts.chevron ? `<span class="sub">›</span>` : ""}
+  </div>`;
+}
+function renderScoped(main){
+  const set = getSet(current().setId);
+  if (!set || !SU){ main.innerHTML = `<div class="card empty">データがありません</div>`; return; }
+  const qs = scopedQuestions(set, SU);
+  let html = backBar("対象の問題一覧");
+  if (!qs.length) html += `<div class="card empty">対象の問題がありません</div>`;
+  else html += `<div class="card flush">` + qs.map(q => questionRowHTML(set, q)).join("") + `</div>`;
+  main.innerHTML = html;
+  wireBack();
+}
+
+// ---------- 問題一覧・編集 ----------
+function renderQList(main){
+  const set = getSet(current().setId);
+  if (!set){ main.innerHTML = `<div class="card empty">リストが見つかりません</div>`; return; }
+  let html = backBar("問題一覧・編集");
+  html += `<div class="card flush">` + set.questions.map(q => questionRowHTML(set, q, {starBtn:true, chevron:true, rowAttrs:`data-q="${q.n}"`})).join("") + `</div>`;
+  main.innerHTML = html;
+  wireBack();
+  $$("[data-star]", main).forEach(btn => {
+    btn.onclick = e => {
+      e.stopPropagation();
+      const q = set.questions.find(x => x.n === Number(btn.dataset.star));
+      if (q){ q.star = !q.star; saveDB(); render(); }
+    };
+  });
+  $$("[data-q]", main).forEach(rowEl => {
+    rowEl.onclick = ()=>{
+      const q = set.questions.find(x => x.n === Number(rowEl.dataset.q));
+      if (q) openQuestionEdit(set, q);
+    };
+  });
+}
+function openQuestionEdit(set, q){
+  const st = statOf(set, q.n);
+  const secOptions = [`<option value="">未分類</option>`].concat(
+    set.sections.map(s => `<option value="${esc(s)}" ${q.sec === s ? "selected" : ""}>${esc(s)}</option>`)).join("");
+  openModal(`<h3>No.${q.n} を編集</h3>
+    <div class="field"><label class="flabel">表面</label><textarea id="qeFront">${esc(q.f)}</textarea></div>
+    <div class="field"><label class="flabel">裏面</label><textarea id="qeBack" style="min-height:48px;">${esc(q.b)}</textarea></div>
+    <div class="field"><label class="flabel">解説</label><textarea id="qeExpl">${esc(q.e)}</textarea></div>
+    <div class="field"><label class="flabel">セクション</label><select id="qeSec" style="width:100%;">${secOptions}</select></div>
+    <div class="row"><div class="grow">スター</div>${switchHTML("qeStar", !!q.star)}</div>
+    <div class="row"><div class="grow">値（自動で記録されます）</div><span class="badge-score ${scoreClass(st.score)}">${scoreText(st.score)}</span></div>
+    ${st.score < 0 ? `<p class="caption">値がマイナスのため、「間違えた問題」として扱われています。</p>` : ""}
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn danger" id="qeDelete">削除</button>
+      <span style="flex:1"></span>
+      <button class="btn" id="qeCancel">キャンセル</button>
+      <button class="btn primary" id="qeSave">保存</button>
+    </div>`);
+  $("#qeCancel").onclick = closeModal;
+  $("#qeSave").onclick = ()=>{
+    q.f = $("#qeFront").value;
+    q.b = $("#qeBack").value;
+    q.e = $("#qeExpl").value;
+    const sv = $("#qeSec").value;
+    q.sec = sv === "" ? null : sv;
+    q.star = $("#qeStar").checked;
+    saveDB(); closeModal(); render();
+  };
+  $("#qeDelete").onclick = async ()=>{
+    closeModal();
+    if (await modalConfirm("問題を削除", `No.${q.n} を削除します。よろしいですか？`, "削除")){
+      set.questions = set.questions.filter(x => x.n !== q.n);
+      delete set.stats[String(q.n)];
+      saveDB(); render();
+    }
+  };
+}
+
+// ---------- セクション管理 ----------
+function renderSections(main){
+  const set = getSet(current().setId);
+  if (!set){ main.innerHTML = `<div class="card empty">リストが見つかりません</div>`; return; }
+  const countOf = name => set.questions.filter(q => q.sec === name).length;
+  const unassigned = set.questions.filter(q => !q.sec).length;
+  let html = backBar("セクションを管理");
+  html += `<div class="card">
+    <div class="field" style="margin-top:8px;"><label class="flabel">新しいセクション</label>
+    <input type="text" id="nsName" placeholder="セクション名" style="width:100%;"></div>
+    <div class="num-row"><span class="lbl">開始</span><input type="number" id="nsFrom" placeholder="任意">
+    <span class="lbl" style="width:40px;">終了</span><input type="number" id="nsTo" placeholder="任意"></div>
+    <p class="caption">番号の範囲を入れると、その範囲の問題が新しいセクションに入ります（任意）。</p>
+    <button class="btn primary block" id="nsAdd">追加</button>
+    <div style="height:6px"></div></div>`;
+  html += `<div class="card flush">`;
+  if (!set.sections.length) html += `<div class="row" style="padding-left:14px;"><div class="grow sub">セクションはまだありません</div></div>`;
+  for (const name of set.sections){
+    html += `<div class="row" style="padding-left:14px;padding-right:8px;">
+      <div class="grow"><div>${esc(name)}</div><div class="sub">${countOf(name)}問</div></div>
+      <button class="btn small" data-assign="${esc(name)}">番号で割当</button>
+      <button class="icon-btn" data-ren="${esc(name)}" aria-label="名前を変更">✎</button>
+      <button class="icon-btn" data-del="${esc(name)}" aria-label="削除" style="color:var(--red);">🗑</button>
+    </div>`;
+  }
+  html += `<div class="row" style="padding-left:14px;"><div class="grow sub">未分類 ${unassigned}問</div></div></div>`;
+  main.innerHTML = html;
+  wireBack();
+  $("#nsAdd").onclick = ()=>{
+    const name = $("#nsName").value.trim();
+    if (!name){ toast("セクション名を入力してください"); return; }
+    if (set.sections.includes(name)){ toast("同じ名前のセクションがあります"); return; }
+    set.sections.push(name);
+    const from = parseInt($("#nsFrom").value, 10), to = parseInt($("#nsTo").value, 10);
+    if (!isNaN(from) && !isNaN(to)) assignSectionRange(set, name, from, to);
+    saveDB(); render();
+  };
+  $$("[data-assign]", main).forEach(btn => {
+    btn.onclick = async ()=>{
+      const name = btn.dataset.assign;
+      openModal(`<h3>番号で割り当てる</h3><p class="small">「${esc(name)}」に入れる問題の番号の範囲</p>
+        <div class="num-row"><span class="lbl">開始</span><input type="number" id="asFrom"></div>
+        <div class="num-row"><span class="lbl">終了</span><input type="number" id="asTo"></div>
+        <div style="display:flex;gap:10px;margin-top:14px;"><button class="btn block" id="asCancel">キャンセル</button><button class="btn primary block" id="asOk">割り当てる</button></div>`);
+      $("#asCancel").onclick = closeModal;
+      $("#asOk").onclick = ()=>{
+        const from = parseInt($("#asFrom").value, 10), to = parseInt($("#asTo").value, 10);
+        closeModal();
+        if (isNaN(from) || isNaN(to)){ toast("開始と終了の両方を入力してください"); return; }
+        assignSectionRange(set, name, from, to); render();
+      };
+    };
+  });
+  $$("[data-ren]", main).forEach(btn => {
+    btn.onclick = async ()=>{
+      const oldName = btn.dataset.ren;
+      const name = await modalPrompt("セクションの名前", oldName);
+      if (!name || name === oldName) return;
+      if (set.sections.includes(name)){ toast("同じ名前のセクションがあります"); return; }
+      renameSection(set, oldName, name); render();
+    };
+  });
+  $$("[data-del]", main).forEach(btn => {
+    btn.onclick = async ()=>{
+      const name = btn.dataset.del;
+      if (await modalConfirm("セクションを削除", `「${name}」を削除します。問題自体は削除されず、未分類に戻ります。`, "削除")){
+        deleteSection(set, name); render();
+      }
+    };
+  });
+}
+</script>
+<script>
+"use strict";
+// ---------- クイズ ----------
+let QZ = null;
+let suppressClick = false;
+function initQuiz(setId, session){
+  QZ = {
+    setId, session, index: 0, graded: false, picked: null, currentCorrect: null,
+    results: {}, finished: false,
+    starred: new Set(session.filter(q => q.star).map(q => q.n))
+  };
+}
+function quizNext(){
+  if (QZ.index + 1 < QZ.session.length){
+    QZ.index++; QZ.graded = false; QZ.picked = null; QZ.currentCorrect = null; render();
+  } else { QZ.finished = true; render(); }
+}
+function quizGoBack(){
+  if (QZ.index <= 0) return;
+  QZ.index--; QZ.graded = false; QZ.picked = null; QZ.currentCorrect = null; render();
+}
+function renderQuiz(main){
+  const set = getSet(QZ ? QZ.setId : null);
+  if (!QZ || !set){ main.innerHTML = `<div class="card empty">データがありません</div>`; return; }
+  if (QZ.finished){ renderResults(main, set); return; }
+  const q = QZ.session[QZ.index];
+  if (!q){ main.innerHTML = `<div class="card empty">問題がありません</div>`; return; }
+  const mode = answerMode(q);
+  const score = statOf(set, q.n).score;
+  const answered = Object.keys(QZ.results).length;
+
+  let html = `<div id="quizRoot">
+    <div class="topbar" style="padding-bottom:2px;">
+      <span style="font-weight:700;">No.${q.n}</span>
+      <span class="badge-score ${scoreClass(score)}">${scoreText(score)}</span>
+      <span class="spacer"></span><span class="sub">${QZ.index + 1} / ${QZ.session.length}</span>
+    </div>
+    <div class="progress"><i style="width:${QZ.session.length ? (answered / QZ.session.length * 100) : 0}%"></i></div>
+    <div class="card" style="margin-top:10px;">
+      <div class="qfront" style="padding:10px 0;">${esc(q.f)}</div>`;
+  if (QZ.graded){
+    html += `<div class="answer-box">`;
+    if (QZ.currentCorrect !== null){
+      html += `<div class="${QZ.currentCorrect ? "result-ok" : "result-ng"}">${QZ.currentCorrect ? "✓ 正解！" : "✗ 不正解"}</div>
+        <div class="ans">正解：${esc(q.b)}</div>`;
+    } else {
+      html += `<div class="ans">答え：${esc(q.b)}</div>`;
+    }
+    if (q.e) html += `<div class="expl">${esc(q.e)}</div>`;
+    html += `</div>`;
+  }
+  html += `</div>
+    <div class="quiz-bottom">
+      <div class="util-row"><span style="flex:1"></span>
+        <button class="star-btn" id="qStar">${QZ.starred.has(q.n) ? `<span class="star-on">★</span>` : `<span class="star-off">☆</span>`}</button>
+        <button class="btn" id="qQuit">やめる</button>
+      </div>`;
+  if (mode.type === "choice"){
+    html += `<div class="opt-grid">` + mode.options.map(opt => {
+      let cls = "";
+      if (QZ.graded){ if (opt === mode.correct) cls = "correct"; else if (opt === QZ.picked) cls = "wrongpick"; }
+      return `<button class="opt-btn ${cls}" data-opt="${esc(opt)}" ${QZ.graded ? "disabled" : ""}>${esc(opt)}</button>`;
+    }).join("") + `</div>`;
+    if (QZ.graded){
+      html += `<button class="btn primary big" id="qNext" style="margin-top:10px;">${QZ.index + 1 < QZ.session.length ? "次の問題へ" : "結果を見る"}</button>`;
+    } else {
+      html += `<button class="btn big" id="qSkipReveal" style="margin-top:10px;">スキップ</button>`;
+    }
+  } else {
+    if (!QZ.graded){
+      html += `<button class="btn primary big" id="qReveal">答えと解説を見る</button>`;
+    } else {
+      html += `<div class="btn-row3">
+        <button class="btn red-outline" id="qWrong">不正解</button>
+        <button class="btn" id="qSkip">スキップ</button>
+        <button class="btn green" id="qCorrect">正解</button>
+      </div>`;
+    }
+  }
+  html += `</div></div>`;
+  main.innerHTML = html;
+
+  $("#qQuit").onclick = ()=> goBack();
+  $("#qStar").onclick = ()=>{
+    const now = !QZ.starred.has(q.n);
+    if (now) QZ.starred.add(q.n); else QZ.starred.delete(q.n);
+    const target = set.questions.find(x => x.n === q.n);
+    if (target){ target.star = now; saveDB(); }
+    render();
+  };
+  $$("[data-opt]", main).forEach(btn => {
+    btn.onclick = ()=>{
+      if (QZ.graded) return;
+      const opt = btn.dataset.opt;
+      const ok = opt === mode.correct;
+      QZ.picked = opt; QZ.currentCorrect = ok; QZ.graded = true;
+      QZ.results[q.n] = ok;
+      recordResult(set, q.n, ok);
+      render();
+    };
+  });
+  const nr = $("#qNext"); if (nr) nr.onclick = quizNext;
+  const sr = $("#qSkipReveal"); if (sr) sr.onclick = ()=>{ QZ.graded = true; render(); };
+  const rv = $("#qReveal"); if (rv) rv.onclick = ()=>{ QZ.graded = true; render(); };
+  const sk = $("#qSkip"); if (sk) sk.onclick = quizNext;
+  const wr = $("#qWrong"); if (wr) wr.onclick = ()=>{ QZ.currentCorrect = false; QZ.results[q.n] = false; recordResult(set, q.n, false); quizNext(); };
+  const cr = $("#qCorrect"); if (cr) cr.onclick = ()=>{ QZ.currentCorrect = true; QZ.results[q.n] = true; recordResult(set, q.n, true); quizNext(); };
+
+  // スワイプ：右へ＝前の問題（問題画面で開く）、左へ＝解説を見ずに次へ
+  let dragStart = null;
+  main.onpointerdown = e => { dragStart = {x: e.clientX, y: e.clientY}; };
+  main.onpointerup = e => {
+    if (!dragStart || !QZ || QZ.finished || current().screen !== "quiz") { dragStart = null; return; }
+    const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+    dragStart = null;
+    if (Math.abs(dy) < 50){
+      if (dx > 80){ suppressClick = true; quizGoBack(); }
+      else if (dx < -80){ suppressClick = true; quizNext(); }
+    }
+  };
+}
+function renderResults(main, set){
+  const total = Object.keys(QZ.results).length;
+  const correctCount = Object.values(QZ.results).filter(Boolean).length;
+  const wrong = QZ.session.filter(q => QZ.results[q.n] === false);
+  let html = `<h1 class="screen-title">結果</h1>
+    <div class="card" style="text-align:center;padding:18px 14px;">
+      <div style="font-size:24px;font-weight:800;">${correctCount} / ${total} 問正解</div>
+      ${total ? `<div class="sub">正答率 ${Math.floor(correctCount / total * 100)}%</div>` : ""}
+    </div>`;
+  if (wrong.length){
+    html += `<div class="section-label">間違えた問題（${wrong.length}問）</div><div class="card flush">` +
+      wrong.map(q => `<div class="row" style="padding-left:14px;padding-right:14px;"><div class="grow">
+        <div class="small"><span class="sub">No.${q.n}</span> ${QZ.starred.has(q.n) ? `<span class="star-on">★</span>` : ""}</div>
+        <div class="clamp2">${esc(q.f)}</div>
+        <div class="small" style="color:var(--red);">正解：${esc(q.b)}</div>
+      </div></div>`).join("") + `</div>`;
+  }
+  html += `<div class="card">
+    ${wrong.length ? `<div class="row"><button class="btn block" id="rRetry">間違えた問題だけもう一度</button></div>` : ""}
+    <div class="row"><button class="btn primary block" id="rDone">終わる</button></div>
+  </div>`;
+  main.innerHTML = html;
+  main.onpointerdown = null; main.onpointerup = null;
+  const rt = $("#rRetry");
+  if (rt) rt.onclick = ()=>{
+    QZ.session = wrong; QZ.index = 0; QZ.results = {};
+    QZ.graded = false; QZ.picked = null; QZ.currentCorrect = null; QZ.finished = false;
+    render();
+  };
+  $("#rDone").onclick = ()=> goBack();
+}
+</script>
+<script>
+"use strict";
+// ---------- 統計 ----------
+function renderStats(main){
+  const daily = DB.daily;
+  const keys = Object.keys(daily).sort().reverse();
+  const total = keys.reduce((a, k)=> a + daily[k].a, 0);
+  let html = `<h1 class="screen-title">統計</h1>
+    <div class="card">
+      <div class="row"><div class="grow">統計を取る</div>${switchHTML("swStats", DB.settings.statsEnabled)}</div>
+      <div class="caption" style="padding-bottom:10px;">オンにすると、問題を解いた数が日ごとに記録されます。オフの間は記録されません。</div>
+    </div>`;
+  if (!keys.length){
+    html += `<div class="card empty">${DB.settings.statsEnabled ? "まだ記録がありません。問題を解くと、ここに日ごとの記録が出ます。" : "統計はオフです。オンにすると、その日から記録が始まります。"}</div>`;
+  } else {
+    html += `<div class="section-label">合計</div>
+      <div class="card">
+        <div class="row"><div class="grow">解いた問題数</div><span class="kv-num">${total}問</span></div>
+        <div class="row"><div class="grow">記録した日数</div><span class="kv-num">${keys.length}日</span></div>
+      </div>
+      <div class="section-label">グラフ（直近14日）</div>
+      <div class="card"><canvas id="chart"></canvas></div>
+      <div class="section-label">日ごとの記録</div>
+      <div class="card">` + keys.map(k => {
+        const d = daily[k];
+        const maxA = Math.max.apply(null, keys.map(x => daily[x].a).concat([1]));
+        const pct = d.a ? Math.floor(d.c / d.a * 100) : 0;
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--sep);">
+          <div class="row" style="border:none;padding:0 0 4px;"><div class="grow" style="font-weight:600;">${esc(dateLabelOf(k))}</div><span class="kv-num">${d.a}問</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.a / maxA * 100)}%"></div></div>
+          <div class="caption" style="margin-top:4px;"><span style="color:var(--green);">正解 ${d.c}</span>　<span style="color:var(--red);">不正解 ${d.w}</span>　正答率 ${pct}%</div>
+        </div>`;
+      }).join("") + `</div>`;
+  }
+  main.innerHTML = html;
+  const sw = $("#swStats");
+  if (sw) sw.onchange = ()=>{ DB.settings.statsEnabled = sw.checked; saveDB(); render(); };
+  const canvas = $("#chart");
+  if (canvas) drawChart(canvas, daily);
+}
+function drawChart(canvas, daily){
+  const keysAsc = Object.keys(daily).sort().slice(-14);
+  if (!keysAsc.length) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const maxV = Math.max.apply(null, keysAsc.map(k => daily[k].a).concat([1]));
+  const labelH = 18, topPad = 16;
+  const chartH = h - labelH - topPad;
+  const slot = w / keysAsc.length;
+  const barW = Math.min(30, slot * 0.6);
+  ctx.textAlign = "center";
+  keysAsc.forEach((k, i)=>{
+    const v = daily[k].a;
+    const bh = Math.max(2, chartH * v / maxV);
+    const x = slot * i + (slot - barW) / 2;
+    const y = topPad + chartH - bh;
+    ctx.fillStyle = "#4f46e5";
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, 3); else ctx.rect(x, y, barW, bh);
+    ctx.fill();
+    ctx.fillStyle = "#111827";
+    ctx.font = "11px sans-serif";
+    ctx.fillText(String(v), slot * i + slot / 2, y - 3);
+    ctx.fillStyle = "#6b7280";
+    const parts = k.split("-");
+    ctx.fillText(`${Number(parts[1])}/${Number(parts[2])}`, slot * i + slot / 2, h - 4);
+  });
+}
+
+// ---------- 起動 ----------
+document.addEventListener("click", e => {
+  if (suppressClick){ suppressClick = false; e.stopPropagation(); e.preventDefault(); }
+}, true);
+$("#tab-list").onclick = ()=>{ if (current().screen !== "list") goRoot("list"); };
+$("#tab-stats").onclick = ()=>{ if (current().screen !== "stats") goRoot("stats"); };
+$("#fileInput").addEventListener("change", e => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = "";
+  if (files.length) handleFiles(files);
+});
+$("#jsonInput").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (f) handleJSONFile(f);
+});
+if ("serviceWorker" in navigator){
+  try { navigator.serviceWorker.register("sw.js").catch(()=>{}); } catch(e) { /* 未対応環境では何もしない */ }
+}
+loadDB().then(()=> render());
+</script>
+</body>
+</html>
